@@ -15,9 +15,13 @@ const Client = require('../models/Client.model')
 
 router.get('/clients', (req, res, next) => {
 
-    User.find()
+    const {_id} = req.payload
+
+    User.findById(_id)
     .populate('clients')
-    .then((response) => res.json(response))
+    .then((response) =>  {
+      console.log(response)
+      res.json(response)})
     .catch((err) => next(err))
 
 })
@@ -28,13 +32,12 @@ router.get('/clients', (req, res, next) => {
 
 router.post('/new-client', (req, res, next) => {
 
-    const { username, password, userId } = req.body;
+    const { username, email, password, userId } = req.body;
 
-    console.log(req.body)
-
-    Client.create({username, password, projects: []})
+    Client.create({username, email, password, user: userId, projects: []})
     .then((newClient) => {
-        return User.findByIdAndUpdate(userId, { $push: { clients: newClient._id } }, { new: true });
+       
+        return User.findByIdAndUpdate(newClient.user, { $push: { clients: newClient._id } }, { new: true });
       })
     .then((response) => res.json(response))
     .catch((err) => next(err))
@@ -71,6 +74,10 @@ router.delete('/:clientId', (req, res, next) => {
       }
 
       Client.findOneAndDelete(clientId)
+      .then((deletedClient) => {
+          console.log(deletedClient)
+        return User.findByIdAndUpdate(deletedClient.user, { $pull: { clients: deletedClient._id } })
+      })
       .then(() => res.json({message: `Client ${clientId} was deleted`}))
       .catch((err) => next(err))
 })

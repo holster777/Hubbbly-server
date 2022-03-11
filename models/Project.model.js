@@ -4,7 +4,6 @@ const projectSchema = new Schema(
   {
     name: {
       type: String,
-      unique: true,
     },
     client: { type: Schema.Types.ObjectId, ref: 'Client' },
     cards: {
@@ -15,4 +14,4 @@ const projectSchema = new Schema(
 
 const Project = model("Project", projectSchema);
 
-module.exports = Project;
+module.exports = Project

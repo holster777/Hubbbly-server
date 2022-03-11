@@ -6,24 +6,75 @@ const mongoose = require('mongoose')
 
 // Models
 
-const User = require('../models/User.model')
 const Client = require('../models/Client.model')
-const Card = require('../models/Card.model')
+const Project = require('../models/Project.model')
 
 // --- Routes --- //
 
-// Create Card //
+// Get Projects // 
 
-router.post('/new-card', (req, res, next) => {
+router.get('/:clientId/projects', (req, res, next) => {
 
-    const { clientId, cardType, name, description, images, colors, colorName, colorNotes  } = req.body;
+    const {clientId} = req.params
 
-    Card.create({cardType, name, description, images, colors, colorName, colorNotes})
-    .then((newCard) => {
-        return Client.findByIdAndUpdate(clientId, { $push: { cards: newCard._id } }, { new: true });
+    Client.findById(clientId)
+    .populate('projects')
+    .then((response) => res.json(response))
+    .catch((err) => next(err))
+
+})
+
+
+// Create Project //
+
+router.post('/new-project', (req, res, next) => {
+
+    const { clientId, name } = req.body;
+
+    Project.create({ name, client: clientId, cards:[]})
+    .then((newProject) => {
+        return Client.findByIdAndUpdate(newProject.client, { $push: { projects: newProject._id } }, { new: true });
       })
     .then((response) => res.json(response))
     .catch((err) => next(err))
+
+
+})
+
+// Edit Project
+
+router.put('/:projectId', (req, res, next) => {
+
+    const {projectId} = req.params
+
+    if (!mongoose.Types.ObjectId.isValid(projectId)) {
+        res.status(400).json({ message: 'Specified Id is not valid' });
+        return;
+      }
+
+    Project.findByIdAndUpdate(projectId, req.body, {new:true})
+    .then((response) => res.json(response))
+    .catch((err) => next(err))
+
+})
+
+// Delete Project
+
+router.delete('/:projectId', (req, res, next) => {
+
+    const {projectId} = req.params
+
+    if (!mongoose.Types.ObjectId.isValid(projectId)) {
+        res.status(400).json({ message: 'Specified Id is not valid' });
+        return;
+      }
+
+      Project.findByIdAndDelete(projectId)
+      .then((deletedProject) => {
+        return Client.findByIdAndUpdate(deletedProject.client, { $pull: { projects: projectId } })
+      })
+      .then(() => res.json({message: `Project ${projectId} was deleted`}))
+      .catch((err) => next(err))
 
 
 })

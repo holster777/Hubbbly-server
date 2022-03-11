@@ -9,6 +9,10 @@ const userSchema = new Schema(
     password: {
       type: String,
     },
+    userMode: {
+      type: String,
+      enum: ['designer', 'client']
+    },
     clients:
       [{ type: Schema.Types.ObjectId, ref: 'Client' }]
   }
