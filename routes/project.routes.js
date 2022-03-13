@@ -13,7 +13,7 @@ const Card = require('../models/Card.model')
 
 // Get Cards //
 
-router.get('/cards', (req, res, next) => {
+router.get('/:projectId/cards', (req, res, next) => {
 
     const {projectId} = req.body
 

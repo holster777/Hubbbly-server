@@ -7,7 +7,7 @@ const projectSchema = new Schema(
     },
     client: { type: Schema.Types.ObjectId, ref: 'Client' },
     cards: {
-      type: Array
+      type: [{ type: Schema.Types.ObjectId, ref: 'Card' }]
     }
   }
 );
