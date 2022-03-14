@@ -15,7 +15,7 @@ const Card = require('../models/Card.model')
 
 router.get('/:projectId/cards', (req, res, next) => {
 
-    const {projectId} = req.body
+    const {projectId} = req.params
 
     Project.findById(projectId)
     .populate('cards')

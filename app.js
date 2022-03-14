@@ -34,6 +34,9 @@ app.use("/client", isAuthenticated, clientRoutes);
 const projectRoutes = require("./routes/project.routes");
 app.use("/project", isAuthenticated, projectRoutes);
 
+const cardRoutes = require("./routes/card.routes");
+app.use("/card", isAuthenticated, cardRoutes)
+
 // ❗ Error Route
 
 require("./error-handling")(app);
