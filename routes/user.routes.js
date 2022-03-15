@@ -3,6 +3,7 @@
 // Dependencies
 const router = require('express').Router()
 const mongoose = require('mongoose')
+const { isAuthenticated } = require('../middleware/jwt.middleware');
 
 // Models
 
@@ -30,11 +31,13 @@ router.get('/clients', (req, res, next) => {
 // Create Client //
 
 
-router.post('/new-client', (req, res, next) => {
+router.post('/new-client', isAuthenticated, (req, res, next) => {
 
-    const { username, email, password, userId } = req.body;
+  const user = req.payload
 
-    Client.create({username, email, password, user: userId, projects: []})
+    const { username, email, password } = req.body;
+
+    Client.create({username, email, password, user: user._id, projects: []})
     .then((newClient) => {
        
         return User.findByIdAndUpdate(newClient.user, { $push: { clients: newClient._id } }, { new: true });
@@ -44,6 +47,25 @@ router.post('/new-client', (req, res, next) => {
 
 
 })
+
+// Get One Client //
+
+
+router.get('/:clientId', isAuthenticated, (req, res, next) => {
+
+  const {clientId} = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(clientId)) {
+    res.status(400).json({ message: 'Specified Id is not valid' });
+    return;
+  }
+
+  Client.findById(clientId, req.body, {new:true})
+    .then((response) => res.json(response))
+    .catch((err) => next(err))
+
+})
+
 
 // Edit Client //
 
