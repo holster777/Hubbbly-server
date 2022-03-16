@@ -3,6 +3,7 @@
 // Dependencies
 const router = require('express').Router()
 const mongoose = require('mongoose')
+const { isAuthenticated } = require('../middleware/jwt.middleware')
 
 // Models
 
@@ -19,6 +20,24 @@ router.get('/:clientId/projects', (req, res, next) => {
 
     Client.findById(clientId)
     .populate('projects')
+    .then((response) => res.json(response))
+    .catch((err) => next(err))
+
+})
+
+// Get One Project //
+
+
+router.get('/:projectId', isAuthenticated, (req, res, next) => {
+
+  const {projectId} = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(projectId)) {
+    res.status(400).json({ message: 'Specified Id is not valid' });
+    return;
+  }
+
+  Project.findById(projectId, req.body, {new:true})
     .then((response) => res.json(response))
     .catch((err) => next(err))
 
