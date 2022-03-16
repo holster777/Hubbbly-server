@@ -90,15 +90,17 @@ router.delete('/:clientId', (req, res, next) => {
 
     const {clientId} = req.params
 
+    console.log('server',clientId)
+
     if (!mongoose.Types.ObjectId.isValid(clientId)) {
         res.status(400).json({ message: 'Specified Id is not valid' });
         return;
       }
 
-      Client.findOneAndDelete(clientId)
+      Client.findByIdAndDelete(clientId)
       .then((deletedClient) => {
-          console.log(deletedClient)
-        return User.findByIdAndUpdate(deletedClient.user, { $pull: { clients: deletedClient._id } })
+          console.log('dc', deletedClient)
+        return User.findByIdAndUpdate(deletedClient.user, { $pull: { clients: {_id: deletedClient._id} } })
       })
       .then(() => res.json({message: `Client ${clientId} was deleted`}))
       .catch((err) => next(err))
